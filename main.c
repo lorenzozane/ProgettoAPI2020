@@ -17,7 +17,6 @@ enum commands {
 typedef struct node {
     char commandType;
     int command[2];
-//    char *command;
     int32_t *changedLines;
     int finalOutputStateDimension;
     struct node *next;
@@ -80,7 +79,6 @@ void readInput(int index, bool needRealloc, NODE *nodeToInsert, int saveIndex, b
     }
 
     if (!readFromRedoable) {
-//        inputText = realloc(inputText, (inputTextDimension + 1) * sizeof(char *));
 #ifdef LOCAL
         if (fgets(readLine, 1024, fp) != NULL) {
             inputText[inputTextDimension] = malloc((strlen(readLine) + 1) * sizeof(char));
@@ -107,45 +105,30 @@ void readInput(int index, bool needRealloc, NODE *nodeToInsert, int saveIndex, b
 
 void printOutput(int index1, int index2) {
 #ifdef LOCAL
-    //    if (index == -1 || index >= finalOutputDimension) {
-    //        fputs(".\n", fout);
-    //        return;
-    //    }
         for (int i = index1; i < index2; i++) {
             if (!(i == -1 || i >= finalOutputDimension) && finalOutput[i] != -1) {
-    //            strtok(inputText[finalOutput[i]], "\n");
-    //            strcat(inputText[finalOutput[i]], "\n");
                 fputs(inputText[finalOutput[i]], fout);
             } else {
                 fputc('.', fout);
                 fputc('\n', fout);
-    //            fputs(".\n", fout);
                 }
         }
 #else
-//    if (index == -1 || index >= finalOutputDimension) {
-//        fputs(".\n", stdout);
-//        return;
-//    }
     for (int i = index1; i < index2; i++) {
         if (!(i == -1 || i >= finalOutputDimension) && finalOutput[i] != -1) {
-//            strtok(inputText[finalOutput[i]], "\n");
-//            strcat(inputText[finalOutput[i]], "\n");
             fputs(inputText[finalOutput[i]], stdout);
         } else {
             fputc('.', stdout);
             fputc('\n', stdout);
-//            fputs(".\n", stdout);
         }
     }
 
 #endif
 }
 
-void shiftElements(int initialShiftIndex, int finalShiftIndex/*, bool increase*/) {
+void shiftElements(int initialShiftIndex, int finalShiftIndex) {
     int shiftDimension = finalShiftIndex - initialShiftIndex + 1;
 
-//    if (!increase) {
     for (int i = 0; i < finalOutputDimension - shiftDimension; i++) {
         if (finalShiftIndex + i < finalOutputDimension) {
             if (finalOutput[finalShiftIndex + i] == -1) {
@@ -156,46 +139,7 @@ void shiftElements(int initialShiftIndex, int finalShiftIndex/*, bool increase*/
         } else
             break;
     }
-//    }
-//    else {
-//        if (initialShiftIndex > finalOutputDimension)
-//            return;
-//        else {
-//            shiftDimension = finalOutputDimension - initialShiftIndex + 1;
-//
-//            finalOutput = realloc(finalOutput, (finalShiftIndex + shiftDimension) * sizeof(int32_t));
-//            int oldFinalOutputDimension = finalOutputDimension;
-//            finalOutputDimension = finalShiftIndex + shiftDimension;
-//
-//            for (int i = oldFinalOutputDimension; i >= initialShiftIndex; i--) {
-//                if (finalOutput[i - 1] == -1) {
-//                    finalOutput[i + (finalShiftIndex - initialShiftIndex + 1) - 1] = -1;
-//                } else {
-//                    finalOutput[i + (finalShiftIndex - initialShiftIndex + 1) - 1] = finalOutput[i - 1];
-//                }
-//            }
-//        }
-//    }
 }
-
-//NODE *createNewNode(char *command, int changedLinesDimension) {
-//    NODE *newNode;
-//    newNode = malloc(sizeof(NODE));
-//
-//    newNode->commandType = parser(command);
-//    char *ptr;
-//    newNode->command[0] = strtol(command, &ptr, 10);
-//    ptr++;
-//    newNode->command[1] = strtol(ptr, &ptr, 10);
-////    newNode->command = malloc((strlen(command) + 1) * sizeof(char));
-////    strcpy(newNode->command, command);
-//    newNode->changedLines = calloc(changedLinesDimension, sizeof(int32_t));
-////    for (int i = 0; i < changedLinesDimension; i++) {
-////        newNode->changedLines[i] = -1;
-////    }
-//
-//    return newNode;
-//}
 
 NODE *createNewNodeIndex(char commandType, int index1, int index2, int changedLinesDimension) {
     NODE *newNode;
@@ -204,13 +148,7 @@ NODE *createNewNodeIndex(char commandType, int index1, int index2, int changedLi
     newNode->commandType = commandType;
     newNode->command[0] = index1;
     newNode->command[1] = index2;
-//    newNode->command = malloc((strlen(command) + 1) * sizeof(char));
-//    strcpy(newNode->command, command);
-//    newNode->changedLines = calloc(changedLinesDimension, sizeof(int32_t));
     newNode->changedLines = malloc(changedLinesDimension * sizeof(int32_t));
-//    for (int i = 0; i < changedLinesDimension; i++) {
-//        newNode->changedLines[i] = -1;
-//    }
 
     return newNode;
 }
@@ -251,10 +189,6 @@ void deleteNodeRedoable() {
 }
 
 void undoChange() {
-//    char *ptr;
-//    int index1 = (int) strtol(undoableListFirst->command, &ptr, 10);
-//    ptr = ptr + 1;
-//    int index2 = (int) strtol(ptr, &ptr, 10);
     int index1 = undoableListFirst->command[0];
     int index2 = undoableListFirst->command[1];
 
@@ -280,7 +214,6 @@ void undoChange() {
         } else {
             if (indexToFree > 0) {
                 finalOutput = realloc(finalOutput, (finalOutputDimension - indexToFree) * sizeof(int32_t));
-                //TODO: Set to 0?
                 finalOutputDimension -= indexToFree;
                 index2 -= indexToFree;
                 indexToFree = 0;
@@ -294,18 +227,13 @@ void undoChange() {
 
     if (indexToFree > 0) {
         finalOutput = realloc(finalOutput, (finalOutputDimension - indexToFree) * sizeof(int32_t));
-        //TODO: Set to 0?
         finalOutputDimension -= indexToFree;
-//        indexToFree = 0;
 
         if (finalOutputDimension > 0) {
             int toFree = 0;
 
             while (finalOutput[finalOutputDimension - 1] == -1 && finalOutputDimension >= 1) {
                 toFree++;
-//                finalOutput = realloc(finalOutput, (finalOutputDimension - 1) * sizeof(int32_t));
-                //TODO: Set to 0?
-//                finalOutputDimension--;
             }
 
             if (toFree > 0) {
@@ -320,14 +248,8 @@ void undoChange() {
 }
 
 void undoDelete() {
-//    char *ptr;
-//    int index1 = (int) strtol(undoableListFirst->command, &ptr, 10);
-//    ptr = ptr + 1;
-//    int index2 = (int) strtol(ptr, &ptr, 10);
     int index1 = undoableListFirst->command[0];
     int index2 = undoableListFirst->command[1];
-
-//    bool copy = true;
 
     if (index1 == 0 && index2 == 0) {
         NODE *nodeToAdd = createNewNodeIndex(undoableListFirst->commandType, undoableListFirst->command[0],
@@ -337,41 +259,11 @@ void undoDelete() {
         return;
     }
 
-    //TODO: Reinsert?
-//    if (index1 == 0) {
-//        index1 = 1;
-//    }
-
     NODE *nodeToAdd = createNewNodeIndex(undoableListFirst->commandType, undoableListFirst->command[0],
                                          undoableListFirst->command[1], 0);
 
-//    shiftElements(index1, index2, true);
-//    for (int i = index1; i <= index2; i++) {
-//        if (finalOutput == NULL)
-//            finalOutput = malloc(0);
-//        if (i > finalOutputDimension) {
-//            if (undoableListFirst->changedLines[i - index1] == 0)
-//                copy = false;
-//            else {
-//                finalOutput = realloc(finalOutput, (finalOutputDimension + 1) * sizeof(int32_t));
-//                finalOutput[i - 1] = undoableListFirst->changedLines[i - index1];
-//                finalOutputDimension++;
-//            }
-//        } else {
-//            finalOutput[i - 1] = undoableListFirst->changedLines[i - index1];
-//        }
-//        if (copy) {
-//            strcpy(finalOutput[i - 1], undoableListFirst->changedLines[i - index1]);
-//        }
-//    }
-
     if (undoableListFirst->changedLines != NULL) {
         free(finalOutput);
-//        finalOutput = calloc(undoableListFirst->finalOutputStateDimension, sizeof(int32_t));
-//        for (int i = 0; i < undoableListFirst->finalOutputStateDimension; i++) {
-//            finalOutput[i] = undoableListFirst->changedLines[i];
-//        }
-//        free(finalOutput);
         finalOutput = undoableListFirst->changedLines;
         finalOutputDimension = undoableListFirst->finalOutputStateDimension;
     }
@@ -380,13 +272,7 @@ void undoDelete() {
     deleteNodeUndoable();
 }
 
-int commandHandler(/*char *readLine*/char commandType, int index1, int index2, bool readFromRedoable) {
-//    char *ptr;
-//    int index1 = (int) strtol(readLine, &ptr, 10);
-//    ptr = ptr + 1;
-//    int index2 = (int) strtol(ptr, &ptr, 10);
-
-//    enum commands command = parser(readLine);
+int commandHandler(char commandType, int index1, int index2, bool readFromRedoable) {
     enum commands command = (unsigned char) commandType;
 
     if (index1 == 0 && index2 >= 1 && command != 3)
@@ -443,17 +329,14 @@ int commandHandler(/*char *readLine*/char commandType, int index1, int index2, b
         undoableListFirst = insertNode(nodeToAdd, undoableListFirst);
 
         if (!readFromRedoable) {
-//            char ignore[11];
 #ifdef LOCAL
             do {
                 ignore = (char)fgetc_unlocked(fp);
             } while (ignore != '\n');
-//            (void) fgets(ignored, 10, fp);
 #else
             do {
                 ignore = (char) fgetc_unlocked(stdin);
             } while (ignore != '\n');
-//            (void) fgets(ignored, 10, stdin);
 #endif
         }
     } else if (command == 2) {
@@ -463,17 +346,9 @@ int commandHandler(/*char *readLine*/char commandType, int index1, int index2, b
             return 0;
         }
 
-//        NODE *nodeToAdd = createNewNode(readLine, (index2 - index1 + 1));
         NODE *nodeToAdd = createNewNodeIndex(commandType, index1, index2, finalOutputDimension);
 
         if (index1 <= finalOutputDimension && index2 <= finalOutputDimension) {
-//            for (int i = index1; i <= index2; i++) {
-//                if (finalOutput[i - 1] == 0) {
-//                    nodeToAdd->changedLines[i - index1] = 0;
-//                } else {
-//                    nodeToAdd->changedLines[i - index1] = finalOutput[i - 1];
-//                }
-//            }
             if (finalOutput == NULL)
                 nodeToAdd->changedLines = NULL;
             else {
@@ -483,23 +358,13 @@ int commandHandler(/*char *readLine*/char commandType, int index1, int index2, b
             }
             nodeToAdd->finalOutputStateDimension = finalOutputDimension;
 
-            shiftElements(index1, index2/*, false*/);
+            shiftElements(index1, index2);
             for (int i = finalOutputDimension; i > finalOutputDimension - (index2 - index1 + 1); i--) {
                 finalOutput[i - 1] = -1;
             }
             finalOutput = realloc(finalOutput, (finalOutputDimension - (index2 - index1 + 1)) * sizeof(int32_t));
             finalOutputDimension = finalOutputDimension - (index2 - index1 + 1);
         } else if (index1 <= finalOutputDimension && index2 > finalOutputDimension) {
-//            for (int i = finalOutputDimension + 1; i <= index2; i++) {
-//                nodeToAdd->changedLines[i - index1] = 0;
-//            }
-//            for (int i = index1; i <= finalOutputDimension; i++) {
-//                if (finalOutput[i - 1] == 0) {
-//                    nodeToAdd->changedLines[i - index1] = 0;
-//                } else {
-//                    nodeToAdd->changedLines[i - index1] = finalOutput[i - 1];
-//                }
-//            }
             if (finalOutput == NULL)
                 nodeToAdd->changedLines = NULL;
             else {
@@ -513,9 +378,6 @@ int commandHandler(/*char *readLine*/char commandType, int index1, int index2, b
                                   (finalOutputDimension - (finalOutputDimension - index1 + 1)) * sizeof(int32_t));
             finalOutputDimension = finalOutputDimension - (finalOutputDimension - index1 + 1);
         } else {
-//            for (int i = index1; i <= index2; i++) {
-//                nodeToAdd->changedLines[i - index1] = 0;
-//            }
             if (finalOutput == NULL)
                 nodeToAdd->changedLines = NULL;
             else {
@@ -532,17 +394,12 @@ int commandHandler(/*char *readLine*/char commandType, int index1, int index2, b
 #ifdef LOCAL
             fputc('.', fout);
             fputc('\n', fout);
-//            fputs(".\n", fout);
 #else
             fputc('.', stdout);
             fputc('\n', stdout);
-//            fputs(".\n", stdout);
 #endif
             index1++;
         }
-//        for (int i = index1 - 1; i < index2; i++) {
-//            printOutput(i);
-//        }
         printOutput(index1 - 1, index2);
     }
 
@@ -613,14 +470,6 @@ void undoRedoCounter(const char *readline) {
         if (index >= redoToDo) {
             index -= redoToDo;
             redoToDo = 0;
-//            if (index >= undoNodeCounter) {
-//                undoToDo = undoNodeCounter;
-//            } else {
-//                if (index + undoToDo >= undoNodeCounter)
-//                    undoToDo = undoNodeCounter;
-//                else
-//                    undoToDo = undoToDo + index;
-//            }
             if (index >= undoNodeCounter || index + undoToDo >= undoNodeCounter) {
                 undoToDo = undoNodeCounter;
             } else {
@@ -633,14 +482,6 @@ void undoRedoCounter(const char *readline) {
         if (index >= undoToDo) {
             index -= undoToDo;
             undoToDo = 0;
-//            if (index >= redoNodeCounter) {
-//                redoToDo = redoNodeCounter;
-//            } else {
-//                if (index + redoToDo >= redoNodeCounter)
-//                    redoToDo = redoNodeCounter;
-//                else
-//                    redoToDo = redoToDo + index;
-//            }
             if (index >= redoNodeCounter || index + redoToDo >= redoNodeCounter) {
                 redoToDo = redoNodeCounter;
             } else {
